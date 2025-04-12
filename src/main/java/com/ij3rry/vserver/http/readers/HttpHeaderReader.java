@@ -1,0 +1,39 @@
+package com.ij3rry.vserver.http.readers;
+
+import com.ij3rry.vserver.http.data.HttpRequest;
+import com.ij3rry.vserver.readers.HeaderReader;
+import com.ij3rry.vserver.utils.ServerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class HttpHeaderReader implements HeaderReader {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpHeaderReader.class);
+
+    @Override
+    public void read(HttpRequest request) {
+        try(InputStream inputStream = request.getInputStream()){
+            Map<String, String> headers = new HashMap<>();
+
+            String line = null;
+            while (!(line = ServerUtils.readLine(inputStream)).isEmpty()){
+                String[] params = line.split(":\\s");
+                if( params.length == 2 ){
+                    headers.put(params[0],params[1]);
+                }
+            }
+            request.getRequestHeader().setHeaders(headers);
+            LOGGER.debug("HTTP/1.1 Headers {}",headers);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
