@@ -1,5 +1,6 @@
 package com.ij3rry.vserver.http.readers;
 
+import com.ij3rry.vserver.http.data.HttpContext;
 import com.ij3rry.vserver.http.data.HttpRequest;
 import com.ij3rry.vserver.readers.HeaderReader;
 import com.ij3rry.vserver.utils.ServerUtils;
@@ -16,11 +17,23 @@ import java.util.Map;
 
 public class HttpHeaderReader implements HeaderReader {
 
+    private HttpHeaderReader(){}
+
+    private static HttpHeaderReader instance;
+
+    public static HttpHeaderReader getInstance(){
+        if(instance == null){
+            instance = new HttpHeaderReader();
+        }
+        return instance;
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpHeaderReader.class);
 
     @Override
-    public void read(HttpRequest request) {
-        try(InputStream inputStream = request.getInputStream()){
+    public void read(HttpContext httpContext) {
+        try{
+            InputStream inputStream = httpContext.getInputStream();
             Map<String, String> headers = new HashMap<>();
 
             String line = null;
@@ -30,7 +43,7 @@ public class HttpHeaderReader implements HeaderReader {
                     headers.put(params[0],params[1]);
                 }
             }
-            request.getRequestHeader().setHeaders(headers);
+            httpContext.getHttpRequest().getRequestHeader().setHeaders(headers);
             LOGGER.debug("HTTP/1.1 Headers {}",headers);
         } catch (IOException e) {
             throw new RuntimeException(e);

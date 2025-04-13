@@ -1,13 +1,15 @@
 package com.ij3rry.vserver.http.data;
 
-import lombok.AllArgsConstructor;
+import com.ij3rry.vserver.data.ServerContext;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class HttpContext {
+public class HttpContext extends ServerContext {
     private HttpRequest httpRequest;
     private HttpResponse httpResponse;
     private InputStream inputStream;
@@ -55,7 +57,7 @@ public class HttpContext {
             }
             if( this.httpRequest == null){
                 HttpRequestHeader header = new HttpRequestHeader();
-                this.httpRequest = new HttpRequest(header,inputStream);
+                this.httpRequest = new HttpRequest(header);
             }
             if( this.httpResponse == null){
                 this.httpResponse = new HttpResponse();

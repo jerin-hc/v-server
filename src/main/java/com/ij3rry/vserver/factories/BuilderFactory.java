@@ -16,7 +16,7 @@ public final class BuilderFactory {
     public static RequestBuilder getBuilderFactory(HttpContext httpContext){
         if (httpContext.getHttpRequest().getRequestHeader().getProtocol().equals(Protocol.HTTP_1_1)){
             LOGGER.debug("HttpRequest builder created for protocol {}",Protocol.HTTP_1_1);
-            return new HttpRequestBuilder();
+            return HttpRequestBuilder.getInstance();
         }
         throw new InternalError("Unable to create builder for "+ httpContext.getHttpRequest().getRequestHeader().getProtocol() +" protocol");
     }

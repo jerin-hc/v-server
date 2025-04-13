@@ -26,7 +26,7 @@ public class ConnectionHandler {
     private final int maxConcurrentTask;
     private final int timeOutMilliSec;
     private final int port;
-    private  static  final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
 
     public ConnectionHandler(int maxConcurrentTask, int timeOutMilliSec, int port) {
         this.maxConcurrentTask = maxConcurrentTask;
@@ -50,10 +50,8 @@ public class ConnectionHandler {
     }
 
     private void handleRequest(Socket socket) {
-        try{
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-
+        try(InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();socket){
             HttpContext httpContext = new HttpContext.HttpContextBuilder()
                     .setInputStream(inputStream)
                     .setOutputStream(outputStream)
@@ -61,18 +59,14 @@ public class ConnectionHandler {
 
             String firstLine = ServerUtils.readLine(inputStream);
             if(firstLine.isEmpty()){
-                LOGGER.error("Request without body");
+                LOGGER.error("Invalid request with empty request line");
                 return;
             }
             LOGGER.debug("Handling request {}",firstLine);
             identifyRequest(firstLine, httpContext.getHttpRequest());
 
             RequestBuilder requestBuilder = BuilderFactory.getBuilderFactory(httpContext);
-            requestBuilder.build(httpContext.getHttpRequest());
-
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
-            bufferedWriter.write("HTTP/1.1 200 OK");
-            bufferedWriter.flush();
+            requestBuilder.build(httpContext);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
