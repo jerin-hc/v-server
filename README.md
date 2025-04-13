@@ -1,93 +1,137 @@
 # v-server
 
-**v-server** is a custom, lightweight Java server built from scratch using **TCP sockets** and **virtual threads** (Project Loom). It’s not a servlet container — it's a raw HTTP/1.1 server meant to explore modern concurrency with a minimal footprint.
-
-## ⚙️ Tech Stack
-
-- Java 21+ (with `--enable-preview`)
-- Virtual Threads (Project Loom)
-- TCP Socket-based networking
-- Maven for build automation
+A lightweight HTTP server built using Java 21 virtual threads and socket programming.  
+This project supports **static file sharing**, **custom route mapping**, and is designed to be **easily extensible** for other protocols like FTP and WebSocket in the future.
 
 ---
 
-## 🚀 Current Features
+## 🚀 Features
 
-- ✅ Built from scratch with **Java Virtual Threads**
-- ✅ Basic **HTTP/1.1 request handling**
-- ❌ No servlet container or framework dependencies
-- 🧪 In active development — the core server loop and handler are working
+- Built from scratch using Java 21 Virtual Threads
+- Supports:
+  - Static file serving (HTML, CSS, etc.)
+  - HTTP methods: `GET`, `POST`, `PUT` (extensible)
+  - Route-based configuration via `YAML`
+- Highly modular and extensible
+- Clean architecture with factory, builder, and singleton design patterns
+- Exception-safe and resource-safe (using try-with-resources)
+- Built as a **Maven project** with preview features enabled
 
 ---
 
-## 📁 Project Structure
-
+## 📂 Project Structure
 ```
 v-server/
 ├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── ij3rry/
-│                   └── vserver/
-│                       └── App.java
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/ij3rry/
+│   │   │       ├── temp-app.controller/
+│   │   │       ├── vserver/
+│   │   │       │   ├── builders/
+│   │   │       │   ├── concurrent/
+│   │   │       │   ├── data/
+│   │   │       │   ├── enums/
+│   │   │       │   ├── exceptions/
+│   │   │       │   ├── factories/
+│   │   │       │   ├── generators/
+│   │   │       │   ├── handlers/
+│   │   │       │   ├── http/
+│   │   │       │   ├── readers/
+│   │   │       │   └── utils/
+│   │   ├── resources/
+│   │   │   ├── http/
+│   │   │   │   └── request-mapper.yaml
+│   │   │   └── WEB-INF/
+│   │   │       └── css/
+│   │   │           ├── index.html
+│   │   │           └── style.css
 ├── pom.xml
 └── README.md
 ```
 
-> `App.java` is the main entry point.
+---
+
+## 🧠 Learnings
+
+- Java 21 **Virtual Threads** and how they scale under high concurrency
+- Understanding the **HTTP protocol**, request/response lifecycle, headers, etc.
+- Low-level **Socket Programming**
+- Handling **Input/Output streams**
+- Using **try-with-resources** for safe and clean resource management
+- Implemented patterns:
+  - **Builder Pattern**
+  - **Factory Pattern**
+  - **Singleton Pattern**
+- Proper **exception handling**
+- Designing **loosely coupled** and maintainable packages for future protocol support
 
 ---
 
-## 🛠️ Running the Server
+## ⚙️ How to Run
 
-To run the project:
+Make sure you're using **Java 21** with `--enable-preview`.
 
-```bash
-mvn clean compile exec:java -Dexec.mainClass="com.ij3rry.vserver.App" -Dexec.args="" -Dexec.jvmArgs="--enable-preview"
-```
+### 🧪 Maven Build
 
-Or package and run:
+mvn clean install
 
-```bash
-mvn package
-java --enable-preview -cp target/v-server-1.0-SNAPSHOT.jar com.ij3rry.vserver.App
-```
+### ▶️ Starting the Server
+ConnectionHandler connectionHandler =
+    new ConnectionHandler.ConnectionHandlerBuilder()
+        .setPort(8080)                  // default
+        .setMaxConcurrentTask(1000)     // default
+        .setTimeOutMilliSec(500)        // default
+        .build();
 
-> ✅ Make sure you're using **JDK 21 or later**.
-
----
-
-## 🧪 Test It
-
-After running:
-
-```bash
-curl http://localhost:8080
-```
+connectionHandler.start();
 
 ---
 
-## 📅 Roadmap
+### 🗺️ Request Mapping (YAML)
+Define supported routes in resources/http/request-mapper.yaml.
 
-- [x] TCP socket server loop
-- [x] HTTP/1.1 parsing (basic)
-- [ ] Status codes & response headers
-- [ ] Routing support
-- [ ] Content-Type detection
-- [ ] Static file serving
-- [ ] Logging & debugging options
-- [ ] HTTP/2 or QUIC (experimental)
+Example:
+
+<pre>
+http:
+  version: 1.1
+  routes:
+    GET:
+      - endpoint: /home
+        type: file
+        path: WEB-INF/css/index.html
+      - endpoint: /style
+        type: file
+        path: WEB-INF/css/style.css
+    POST:
+      - endpoint: /upload
+        type: controller
+        path: com.ij3rry.temp_app.controller.FileUploadController
+    PUT:
+      - endpoint: /update
+        type: controller
+        path: com.ij3rry.temp_app.controller.UpdateController
+</pre>
 
 ---
 
-## 📄 License
+### 🏗️ Future Plans
+Add dynamic response generation via controller classes
 
-MIT
+Support FTP and WebSocket protocols
+
+Write unit test cases for all components
+
+Optional: CLI tool for route management
 
 ---
 
-## 👨‍💻 Author
+### 📄 License
+This project is open-source and free to use.
 
-Built by [ij3rry] — exploring the power of **virtual threads** and low-level server design.
+---
 
+### ✨ Author
+@ij3rry
+Happy hacking! 💻
