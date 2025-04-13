@@ -3,20 +3,20 @@ package com.ij3rry.vserver.handlers;
 import com.ij3rry.vserver.builders.RequestBuilder;
 import com.ij3rry.vserver.concurrent.BoundedThreadExecutor;
 import com.ij3rry.vserver.enums.Protocol;
-import com.ij3rry.vserver.exceptions.InvalidProtocolException;
 import com.ij3rry.vserver.exceptions.InvalidRequestException;
 import com.ij3rry.vserver.factories.BuilderFactory;
+import com.ij3rry.vserver.http.data.HttpContext;
 import com.ij3rry.vserver.http.data.HttpRequest;
 import com.ij3rry.vserver.http.data.HttpRequestHeader;
+import com.ij3rry.vserver.http.data.HttpResponse;
 import com.ij3rry.vserver.utils.ServerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -52,7 +52,12 @@ public class ConnectionHandler {
     private void handleRequest(Socket socket) {
         try{
             InputStream inputStream = socket.getInputStream();
-            HttpRequest httpRequest = new HttpRequest(new HttpRequestHeader(),inputStream);
+            OutputStream outputStream = socket.getOutputStream();
+
+            HttpContext httpContext = new HttpContext.HttpContextBuilder()
+                    .setInputStream(inputStream)
+                    .setOutputStream(outputStream)
+                    .build();
 
             String firstLine = ServerUtils.readLine(inputStream);
             if(firstLine.isEmpty()){
@@ -60,12 +65,12 @@ public class ConnectionHandler {
                 return;
             }
             LOGGER.debug("Handling request {}",firstLine);
-            identifyRequest(firstLine, httpRequest);
+            identifyRequest(firstLine, httpContext.getHttpRequest());
 
-            RequestBuilder requestBuilder = BuilderFactory.getBuilderFactory(httpRequest.getRequestHeader().getProtocol());
-            requestBuilder.build(httpRequest);
+            RequestBuilder requestBuilder = BuilderFactory.getBuilderFactory(httpContext);
+            requestBuilder.build(httpContext.getHttpRequest());
 
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
             bufferedWriter.write("HTTP/1.1 200 OK");
             bufferedWriter.flush();
 
