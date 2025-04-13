@@ -1,0 +1,15 @@
+http:
+  version: 1.1
+  routes:
+    GET:
+      - endpoint: "/index.html"
+        type: file
+        path: "/WEB-INF"
+      - endpoint: "/css/style.css"
+        type: file
+        path: "/WEB-INF"
+
+    POST:
+      - endpoint: "/putValue"
+        type: controller
+        path: /temp-app.controller.TempController
