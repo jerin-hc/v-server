@@ -14,7 +14,8 @@ import java.util.Map;
 public class App 
 {
     public static void main( String[] args ) throws IOException {
-        ConnectionHandler connectionHandler = new ConnectionHandler.ConnectionHandlerBuilder().setPort(8080).setMaxConcurrentTask(1000).setTimeOutMilliSec(500).build();
+        ConnectionHandler connectionHandler = new ConnectionHandler.ConnectionHandlerBuilder().setPort(8080).setMaxConcurrentTask(1000).setTimeOutMilliSec(500).setupHttpServer().build();
+
         try {
             connectionHandler.start();
         } catch (IOException e) {

@@ -1,6 +1,9 @@
 package com.ij3rry.vserver.http.generator.responders.impl;
 
+import com.ij3rry.vserver.http.data.HttpContentType;
 import com.ij3rry.vserver.http.data.HttpContext;
+import com.ij3rry.vserver.http.enums.HttpMethod;
+import com.ij3rry.vserver.http.generator.HttpResponseGenerator;
 import com.ij3rry.vserver.http.generator.responders.HttpResponder;
 
 import java.io.IOException;
@@ -24,10 +27,10 @@ public class HttpStaticFileResponder extends HttpResponder {
     }
 
     @Override
-    public void generateResponse(HttpContext context, Map<String, Object> endpointConfigs) throws IOException {
+    public void generateResponse(HttpContext context, Map<String, Object> endpointConfigs, HttpMethod httpMethod) throws IOException {
         String fileName = context.getHttpRequest().getRequestHeader().getEndpoint();
         String path = (String) endpointConfigs.get("path")+fileName;
-        InputStream inputStream = com.ij3rry.vserver.http.generator.HttpResponseGenerator.class.getResourceAsStream(path);
+        InputStream inputStream = HttpResponseGenerator.class.getResourceAsStream(path);
 
         String[] splitFileName = fileName.split("\\.");
         String headers;
@@ -44,13 +47,13 @@ public class HttpStaticFileResponder extends HttpResponder {
     }
 
     private static String generateHeader(InputStream inputStream,String fileType) throws IOException {
-        String contentType = contentTypeMapper.get(fileType);
+        HttpContentType contentType = HttpContentType.fromExtension(fileType);
         if(contentType == null){
-            contentType = contentTypeMapper.get("txt");
+            contentType = HttpContentType.fromExtension("txt");
         }
         String headers =
                 "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: "+contentType+"; charset=UTF-8\r\n" +
+                        "Content-Type: "+contentType.getMimeType()+"; charset=UTF-8\r\n" +
                         "Content-Length: " + inputStream.available() + "\r\n" +
                         "Connection: close\r\n" +
                         "\r\n";

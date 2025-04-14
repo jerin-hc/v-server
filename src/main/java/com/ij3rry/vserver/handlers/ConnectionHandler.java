@@ -12,7 +12,9 @@ import com.ij3rry.vserver.factories.GeneratorFactory;
 import com.ij3rry.vserver.generators.ResponseGenerator;
 import com.ij3rry.vserver.http.data.HttpContext;
 import com.ij3rry.vserver.http.enums.HttpMethod;
+import com.ij3rry.vserver.http.holders.ControllerClassHolder;
 import com.ij3rry.vserver.utils.ServerUtils;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -29,6 +31,7 @@ public class ConnectionHandler {
     private final int maxConcurrentTask;
     private final int timeOutMilliSec;
     private final int port;
+    @Getter
     private final Map<String, Object> serverConfig;
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
 
@@ -78,11 +81,13 @@ public class ConnectionHandler {
 
     }
 
-
     // http protocol contains <HTTP_METHOD> <PATH> <HTTP_VERSION>
     private ServerContext buildServerContext(String firstLine, InputStream inputStream, OutputStream outputStream, Map<String,Object> serverConfig) throws IOException {
         String[] line = firstLine.split("\\s");
         if (line.length == 3 && line[2].equals(Protocol.HTTP_1_1.toString())) {
+            if(serverConfig == null || serverConfig.get("http") == null){
+                LOGGER.info("/http/request-mapper.yaml is not loaded");
+            }
             Map<String,Object> httpRouteConfig = (Map<String, Object>) serverConfig.get("http");
             Protocol p = Protocol.HTTP_1_1;
             HttpContext httpContext = new HttpContext.HttpContextBuilder()
@@ -109,6 +114,7 @@ public class ConnectionHandler {
         private int timeOutMilliSec = 500;
         private int port = 8080;
         private Map<String, Object> serverConfig;
+        private boolean loadControllerClass;
 
         public ConnectionHandlerBuilder setMaxConcurrentTask(int maxConcurrentTask) {
             this.maxConcurrentTask = maxConcurrentTask;
@@ -130,14 +136,19 @@ public class ConnectionHandler {
             return this;
         }
 
-        public ConnectionHandler build() throws IOException {
+        public ConnectionHandlerBuilder setupHttpServer(){
             Yaml yaml = new Yaml();
             try (InputStream inputStream = ConnectionHandler.class.getResourceAsStream("/http/request-mapper.yaml")) {
                 this.serverConfig = yaml.load(inputStream);
                 LOGGER.info("/http/request-mapper.yaml found with mapping {}", serverConfig.toString());
+                ControllerClassHolder.loadAllControllerClass((Map<String, Object>) serverConfig.get("http"));
             } catch (Exception e) {
                 throw new InvalidRequestMapperException("/http/request-mapper.yaml unavailable",e);
             }
+            return this;
+        }
+
+        public ConnectionHandler build() throws IOException {
             return new ConnectionHandler(this);
         }
     }

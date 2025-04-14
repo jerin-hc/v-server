@@ -54,6 +54,6 @@ public class HttpResponseGenerator implements ResponseGenerator {
 
         GeneratorType generatorType = GeneratorType.fromString((String)endpointConfigs.get("type"));
 
-        HttpResponderFactory.getHttpResponder(generatorType).generateResponse((HttpContext) context, endpointConfigs);
+        HttpResponderFactory.getHttpResponder(generatorType).generateResponse((HttpContext) context, endpointConfigs, method);
     }
 }

@@ -3,6 +3,7 @@ package com.ij3rry.vserver.http.factories;
 import com.ij3rry.vserver.http.enums.GeneratorType;
 import com.ij3rry.vserver.http.generator.HttpResponseGenerator;
 import com.ij3rry.vserver.http.generator.responders.HttpResponder;
+import com.ij3rry.vserver.http.generator.responders.impl.HttpControllerClassResponder;
 import com.ij3rry.vserver.http.generator.responders.impl.HttpStaticFileResponder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,10 @@ public class HttpResponderFactory {
         if(type.equals(GeneratorType.FILE)){
             LOGGER.info("Responder created for Generator type {}",GeneratorType.FILE);
             return HttpStaticFileResponder.getInstance();
+        }
+        if(type.equals(GeneratorType.CONTROLLER)){
+            LOGGER.info("Responder created for Generator type {}",GeneratorType.CONTROLLER);
+            return HttpControllerClassResponder.getInstance();
         }
         else{
             throw new RuntimeException("Generator not implemented for "+type);

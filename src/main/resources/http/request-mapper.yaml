@@ -17,4 +17,4 @@ http:
     POST:
       - endpoint: "/putValue"
         type: controller
-        path: /temp-app.controller.TempController
+        path: com.ij3rry.TempApp.controller.TempController
