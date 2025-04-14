@@ -60,7 +60,7 @@ public class ConnectionHandler {
 
             String firstLine = ServerUtils.readLine(inputStream);
             if(firstLine.isEmpty()){
-                LOGGER.error("Invalid request with empty request line");
+                LOGGER.error("Ignoring request with empty request line");
                 return;
             }
             LOGGER.debug("Handling request {}",firstLine);

@@ -5,10 +5,15 @@ http:
       - endpoint: "/index.html"
         type: file
         path: "/WEB-INF"
+      - endpoint: "/favicon.ico"
+        type: file
+        path: "/WEB-INF"
       - endpoint: "/css/style.css"
         type: file
         path: "/WEB-INF"
-
+      - endpoint: "/images.jpg"
+        type: file
+        path: "/WEB-INF"
     POST:
       - endpoint: "/putValue"
         type: controller
