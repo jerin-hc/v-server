@@ -69,10 +69,10 @@ http:
     GET:
       - endpoint: /index
         type: file
-        path: WEB-INF/css/index.html
+        path: /WEB-INF
       - endpoint: /style
         type: file
-        path: WEB-INF/css/style.css
+        path: /WEB-INF/css
     POST:
       - endpoint: /upload
         type: controller
