@@ -1,6 +1,5 @@
 package com.ij3rry.vserver.handlers;
 
-import com.ij3rry.App;
 import com.ij3rry.vserver.builders.RequestBuilder;
 import com.ij3rry.vserver.concurrent.BoundedThreadExecutor;
 import com.ij3rry.vserver.data.ServerContext;

@@ -4,7 +4,7 @@
 
   <groupId>com.ij3rry</groupId>
   <artifactId>v-server</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-alpha-1</version>
   <packaging>jar</packaging>
 
   <name>v-server</name>
@@ -12,6 +12,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 
   <dependencies>

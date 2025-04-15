@@ -10,7 +10,7 @@ This project supports **static file sharing**, **custom route mapping**, and is 
 - Built from scratch using Java 21 Virtual Threads
 - Supports:
   - Static file serving (HTML, CSS, etc.)
-  - HTTP methods: `GET`, `POST`, `PUT` (extensible)
+  - HTTP methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
   - Route-based configuration via `YAML`
 - Highly modular and extensible
 - Clean architecture with factory, builder, and singleton design patterns
@@ -26,7 +26,6 @@ v-server/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/ij3rry/
-│   │   │       ├── temp-app.controller/
 │   │   │       ├── vserver/
 │   │   │       │   ├── builders/
 │   │   │       │   ├── concurrent/
@@ -39,32 +38,9 @@ v-server/
 │   │   │       │   ├── http/
 │   │   │       │   ├── readers/
 │   │   │       │   └── utils/
-│   │   ├── resources/
-│   │   │   ├── http/
-│   │   │   │   └── request-mapper.yaml
-│   │   │   └── WEB-INF/
-│   │   │       └── css/
-│   │   │           ├── index.html
-│   │   │           └── style.css
 ├── pom.xml
 └── README.md
 ```
-
----
-
-## 🧠 Learnings
-
-- Java 21 **Virtual Threads** and how they scale under high concurrency
-- Understanding the **HTTP protocol**, request/response lifecycle, headers, etc.
-- Low-level **Socket Programming**
-- Handling **Input/Output streams**
-- Using **try-with-resources** for safe and clean resource management
-- Implemented patterns:
-  - **Builder Pattern**
-  - **Factory Pattern**
-  - **Singleton Pattern**
-- Proper **exception handling**
-- Designing **loosely coupled** and maintainable packages for future protocol support
 
 ---
 
@@ -76,29 +52,22 @@ Make sure you're using **Java 21** with `--enable-preview`.
 
 mvn clean install
 
+
 ### ▶️ Starting the Server
-ConnectionHandler connectionHandler =
-    new ConnectionHandler.ConnectionHandlerBuilder()
-        .setPort(8080)                  // default
-        .setMaxConcurrentTask(1000)     // default
-        .setTimeOutMilliSec(500)        // default
-        .build();
 
-connectionHandler.start();
-
----
-
-### 🗺️ Request Mapping (YAML)
-Define supported routes in resources/http/request-mapper.yaml.
-
-Example:
-
+### pom.xml
+    <dependency>
+        <groupId>com.ij3rry</groupId>
+        <artifactId>v-server</artifactId>
+        <version>1.0.0-alpha-1</version>
+    </dependency>
+### resources/http/request-mapper.yaml
 <pre>
 http:
   version: 1.1
   routes:
     GET:
-      - endpoint: /home
+      - endpoint: /index
         type: file
         path: WEB-INF/css/index.html
       - endpoint: /style
@@ -107,25 +76,50 @@ http:
     POST:
       - endpoint: /upload
         type: controller
-        path: com.ij3rry.temp_app.controller.FileUploadController
+        path: com.example.controller.FileUploadController
     PUT:
       - endpoint: /update
         type: controller
-        path: com.ij3rry.temp_app.controller.UpdateController
+        path: com.example.controller.UpdateController
 </pre>
+### main()
+```
+ConnectionHandler connectionHandler =
+    new ConnectionHandler.ConnectionHandlerBuilder()
+        .setPort(8080)                  // default
+        .setMaxConcurrentTask(1000)     // default
+        .setTimeOutMilliSec(500)        // default
+        .setupHttpServer()              // enable http server
+        .build();
 
----
+connectionHandler.start();
+```
+### Implement RESTController
+```
+package com.ij3rry.vserver.http.controller;
 
-### 🏗️ Future Plans
-Add dynamic response generation via controller classes
+import com.ij3rry.vserver.http.data.HttpContext;
+import com.ij3rry.vserver.http.data.HttpResponse;
 
-Support FTP and WebSocket protocols
+public abstract class RESTController  {
+    public HttpResponse doGet(HttpContext context){
+        return new HttpResponse();
+    }
+    public HttpResponse doPost(HttpContext context){
+        return new HttpResponse();
+    }
+    public HttpResponse doPut(HttpContext context){
+        return new HttpResponse();
+    }
+    public HttpResponse doPatch(HttpContext context){
+        return new HttpResponse();
+    }
+    public HttpResponse doDelete(HttpContext context){
+        return new HttpResponse();
+    }
+}
+```
 
-Write unit test cases for all components
-
-Optional: CLI tool for route management
-
----
 
 ### 📄 License
 This project is open-source and free to use.

@@ -29,7 +29,7 @@ public class HttpStaticFileResponder extends HttpResponder {
     @Override
     public void generateResponse(HttpContext context, Map<String, Object> endpointConfigs, HttpMethod httpMethod) throws IOException {
         String fileName = context.getHttpRequest().getRequestHeader().getEndpoint();
-        String path = (String) endpointConfigs.get("path")+fileName;
+        String path = endpointConfigs.get("path") +fileName;
         InputStream inputStream = HttpResponseGenerator.class.getResourceAsStream(path);
 
         String[] splitFileName = fileName.split("\\.");
