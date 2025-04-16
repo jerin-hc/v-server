@@ -3,6 +3,8 @@ package com.ij3rry.vserver.http.generator.responders.impl;
 import com.ij3rry.vserver.http.data.HttpContentType;
 import com.ij3rry.vserver.http.data.HttpContext;
 import com.ij3rry.vserver.http.enums.HttpMethod;
+import com.ij3rry.vserver.http.enums.HttpResponseStatus;
+import com.ij3rry.vserver.http.exceptions.HttpException;
 import com.ij3rry.vserver.http.generator.HttpResponseGenerator;
 import com.ij3rry.vserver.http.generator.responders.HttpResponder;
 
@@ -27,11 +29,14 @@ public class HttpStaticFileResponder extends HttpResponder {
     }
 
     @Override
-    public void generateResponse(HttpContext context, Map<String, Object> endpointConfigs, HttpMethod httpMethod) throws IOException {
+    public void generateResponse(HttpContext context, Map<String, Object> endpointConfigs, HttpMethod httpMethod) throws IOException, HttpException {
         String fileName = context.getHttpRequest().getRequestHeader().getEndpoint();
         String path = endpointConfigs.get("path") +fileName;
         InputStream inputStream = HttpResponseGenerator.class.getResourceAsStream(path);
 
+        if(inputStream==null){
+            throw new HttpException("Resource not found", HttpResponseStatus.NOT_FOUND);
+        }
         String[] splitFileName = fileName.split("\\.");
         String headers;
         if (splitFileName.length == 2) {

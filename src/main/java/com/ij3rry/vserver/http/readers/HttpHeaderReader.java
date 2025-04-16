@@ -1,16 +1,15 @@
 package com.ij3rry.vserver.http.readers;
 
 import com.ij3rry.vserver.http.data.HttpContext;
-import com.ij3rry.vserver.http.data.HttpRequest;
+import com.ij3rry.vserver.http.enums.HttpResponseStatus;
+import com.ij3rry.vserver.http.utils.HttpServerUtils;
 import com.ij3rry.vserver.readers.HeaderReader;
 import com.ij3rry.vserver.utils.ServerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class HttpHeaderReader implements HeaderReader {
             httpContext.getHttpRequest().getRequestHeader().setHeaders(headers);
             LOGGER.debug("HTTP/1.1 Headers {}",headers);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            HttpServerUtils.generateErrorHeader(HttpResponseStatus.BAD_REQUEST,httpContext);
         }
     }
 }

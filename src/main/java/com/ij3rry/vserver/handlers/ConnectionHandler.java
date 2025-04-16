@@ -3,15 +3,12 @@ package com.ij3rry.vserver.handlers;
 import com.ij3rry.vserver.builders.RequestBuilder;
 import com.ij3rry.vserver.concurrent.BoundedThreadExecutor;
 import com.ij3rry.vserver.data.ServerContext;
-import com.ij3rry.vserver.enums.Protocol;
-import com.ij3rry.vserver.exceptions.InvalidRequestException;
 import com.ij3rry.vserver.exceptions.InvalidRequestMapperException;
 import com.ij3rry.vserver.factories.BuilderFactory;
 import com.ij3rry.vserver.factories.GeneratorFactory;
 import com.ij3rry.vserver.generators.ResponseGenerator;
-import com.ij3rry.vserver.http.data.HttpContext;
-import com.ij3rry.vserver.http.enums.HttpMethod;
 import com.ij3rry.vserver.http.holders.ControllerClassHolder;
+import com.ij3rry.vserver.identifiers.ProtocolIdentifier;
 import com.ij3rry.vserver.utils.ServerUtils;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -32,6 +29,7 @@ public class ConnectionHandler {
     private final int port;
     @Getter
     private final Map<String, Object> serverConfig;
+    private static ProtocolIdentifier protocolIdentifier;
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
 
     private ConnectionHandler(ConnectionHandlerBuilder builder) {
@@ -66,7 +64,7 @@ public class ConnectionHandler {
                 return;
             }
             LOGGER.debug("Handling request {}",firstLine);
-            ServerContext serverContext = buildServerContext(firstLine,inputStream,outputStream,serverConfig);
+            ServerContext serverContext = protocolIdentifier.identify(firstLine,inputStream,outputStream,serverConfig);
 
             RequestBuilder requestBuilder = BuilderFactory.getBuilderFactory(serverContext);
             requestBuilder.build(serverContext);
@@ -78,34 +76,6 @@ public class ConnectionHandler {
             LOGGER.error(String.valueOf(e.fillInStackTrace()));
         }
 
-    }
-
-    // http protocol contains <HTTP_METHOD> <PATH> <HTTP_VERSION>
-    private ServerContext buildServerContext(String firstLine, InputStream inputStream, OutputStream outputStream, Map<String,Object> serverConfig) throws IOException {
-        String[] line = firstLine.split("\\s");
-        if (line.length == 3 && line[2].equals(Protocol.HTTP_1_1.toString())) {
-            if(serverConfig == null || serverConfig.get("http") == null){
-                LOGGER.info("/http/request-mapper.yaml is not loaded");
-            }
-            Map<String,Object> httpRouteConfig = (Map<String, Object>) serverConfig.get("http");
-            Protocol p = Protocol.HTTP_1_1;
-            HttpContext httpContext = new HttpContext.HttpContextBuilder()
-                    .setInputStream(inputStream)
-                    .setOutputStream(outputStream)
-                    .setProtocol(p)
-                    .setConfig(httpRouteConfig)
-                    .build();
-            httpContext.getHttpRequest().getRequestHeader().setProtocol(p);
-            httpContext.getHttpRequest().getRequestHeader().setEndpoint(line[1]);
-            httpContext.getHttpRequest().getRequestHeader().setMethod(HttpMethod.valueOf(line[0]));
-            return httpContext;
-        }
-        /*
-        add new here
-         */
-        else{
-            throw new InvalidRequestException("Failed to identify protocol");
-        }
     }
 
     public static class ConnectionHandlerBuilder{
@@ -136,9 +106,16 @@ public class ConnectionHandler {
         }
 
         public ConnectionHandlerBuilder setupHttpServer(){
-            Yaml yaml = new Yaml();
+            try {
+                Class<?> clazz = Class.forName("com.ij3rry.vserver.http.identifiers.HttpProtocolIdentifier");
+                protocolIdentifier = (ProtocolIdentifier) clazz.getDeclaredConstructor().newInstance();
+                LOGGER.info("ProtocolIdentifier class loaded properly {}", clazz.getCanonicalName());
+            } catch (Exception e) {
+                LOGGER.error("ProtocolIdentifier class didn't found, add http module");
+                throw new RuntimeException(e);
+            }
             try (InputStream inputStream = ConnectionHandler.class.getResourceAsStream("/http/request-mapper.yaml")) {
-                this.serverConfig = yaml.load(inputStream);
+                this.serverConfig = new Yaml().load(inputStream);
                 LOGGER.info("/http/request-mapper.yaml found with mapping {}", serverConfig.toString());
                 ControllerClassHolder.loadAllControllerClass((Map<String, Object>) serverConfig.get("http"));
             } catch (Exception e) {
