@@ -34,7 +34,7 @@ public class HttpControllerClassResponder extends HttpResponder {
         byte[] jsonBytes;
         String headers;
 
-        Object obj = ControllerClassHolder.getClazz().get(httpMethod.name()).get(context.getHttpRequest().getRequestHeader().getEndpoint());
+        Object obj = ControllerClassHolder.getClazz().get(httpMethod.name()).get((String) endpointConfigs.get("endpoint"));
         if (obj instanceof RESTController) {
             HttpResponse response;
             if (httpMethod.equals(HttpMethod.POST)) {

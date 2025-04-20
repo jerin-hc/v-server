@@ -31,9 +31,9 @@ public class HttpProtocolIdentifier implements ProtocolIdentifier {
                     .setProtocol(p)
                     .setConfig(httpRouteConfig)
                     .build();
-            httpContext.getHttpRequest().getRequestHeader().setProtocol(p);
-            httpContext.getHttpRequest().getRequestHeader().setEndpoint(line[1]);
-            httpContext.getHttpRequest().getRequestHeader().setMethod(HttpMethod.valueOf(line[0]));
+            httpContext.getHttpRequest().setProtocol(p);
+            httpContext.getHttpRequest().setEndpoint(line[1]);
+            httpContext.getHttpRequest().setMethod(HttpMethod.valueOf(line[0]));
             return httpContext;
         }
         throw new RuntimeException("Unknown protocol "+firstLine);

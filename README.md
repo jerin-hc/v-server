@@ -12,6 +12,11 @@ This project supports **static file sharing**, **custom route mapping**, and is 
   - Static file serving (HTML, CSS, etc.)
   - HTTP methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
   - Route-based configuration via `YAML`
+  - 🔗 URI
+    - Static file name (/index.html)
+    - Dynamic endpoints (/hello)
+    - Dynamic endpoints with path variables (/employee?_name=employee1&age=24_)
+    - Dynamic endpoints with path params (/employee/_java_/details/_L2_)
 - Highly modular and extensible
 - Clean architecture with factory, builder, and singleton design patterns
 - Exception-safe and resource-safe (using try-with-resources)
@@ -55,13 +60,13 @@ mvn clean install
 
 ### ▶️ Starting the Server
 
-### pom.xml
+### 🔧 pom.xml
     <dependency>
         <groupId>com.ij3rry</groupId>
         <artifactId>v-server</artifactId>
         <version>1.0.0-alpha-1</version>
     </dependency>
-### resources/http/request-mapper.yaml
+### 📃 resources/http/request-mapper.yaml
 <pre>
 http:
   version: 1.1
@@ -82,7 +87,7 @@ http:
         type: controller
         path: com.example.controller.UpdateController
 </pre>
-### main()
+### 🔰 main()
 ```
 ConnectionHandler connectionHandler =
     new ConnectionHandler.ConnectionHandlerBuilder()
@@ -94,7 +99,7 @@ ConnectionHandler connectionHandler =
 
 connectionHandler.start();
 ```
-### Implement RESTController
+### 🅰️ Extend abstract RESTController
 ```
 package com.ij3rry.vserver.http.controller;
 
@@ -103,19 +108,19 @@ import com.ij3rry.vserver.http.data.HttpResponse;
 
 public abstract class RESTController  {
     public HttpResponse doGet(HttpContext context){
-        return new HttpResponse();
+        return new HttpResponse(HttpResponseStatus.NOT_IMPLEMENTED);
     }
     public HttpResponse doPost(HttpContext context){
-        return new HttpResponse();
+        return new HttpResponse(HttpResponseStatus.NOT_IMPLEMENTED);
     }
     public HttpResponse doPut(HttpContext context){
-        return new HttpResponse();
+        return new HttpResponse(HttpResponseStatus.NOT_IMPLEMENTED);
     }
     public HttpResponse doPatch(HttpContext context){
-        return new HttpResponse();
+        return new HttpResponse(HttpResponseStatus.NOT_IMPLEMENTED);
     }
     public HttpResponse doDelete(HttpContext context){
-        return new HttpResponse();
+        return new HttpResponse(HttpResponseStatus.NOT_IMPLEMENTED);
     }
 }
 ```

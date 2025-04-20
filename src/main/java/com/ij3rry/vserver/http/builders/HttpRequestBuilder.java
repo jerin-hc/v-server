@@ -3,7 +3,7 @@ package com.ij3rry.vserver.http.builders;
 import com.ij3rry.vserver.builders.RequestBuilder;
 import com.ij3rry.vserver.data.ServerContext;
 import com.ij3rry.vserver.http.data.HttpContext;
-import com.ij3rry.vserver.http.readers.HttpHeaderReader;
+import com.ij3rry.vserver.http.readers.HttpRequestReader;
 
 public class HttpRequestBuilder implements RequestBuilder {
     private static HttpRequestBuilder instance;
@@ -20,7 +20,7 @@ public class HttpRequestBuilder implements RequestBuilder {
     @Override
     public void build(ServerContext context){
         if (context instanceof HttpContext httpContext) {
-            HttpHeaderReader.getInstance().read(httpContext);
+            HttpRequestReader.getInstance().read(httpContext);
         }
     }
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class HttpResponseGenerator implements ResponseGenerator {
 
@@ -36,32 +35,54 @@ public class HttpResponseGenerator implements ResponseGenerator {
         assert context instanceof HttpContext;
         try{
             HttpContext httpContext = (HttpContext) context;
-            HttpMethod method = httpContext.getHttpRequest().getRequestHeader().getMethod();
+            HttpMethod method = httpContext.getHttpRequest().getMethod();
             Map<String, Object> routeConfigs = (Map<String, Object>) context.getServerConfig().get("routes");
             if (routeConfigs == null) {
                 throw new HttpException("routing config not found", HttpResponseStatus.NOT_FOUND);
             }
 
-            List<Map<String, Object>> routes = (List) routeConfigs.get(method.name());
+            List<Map<String, Object>> routes = (List<Map<String, Object>>) routeConfigs.get(method.name());
             if (routes == null || routes.isEmpty()) {
                 throw new HttpException("routing config not found for the http method", HttpResponseStatus.NOT_FOUND);
             }
 
-            Optional<Map<String, Object>> endpointConfigs = routes.stream().filter(stringObjectMap ->
-                            stringObjectMap.get("endpoint").equals(((HttpContext) context)
-                                    .getHttpRequest().getRequestHeader()
-                                    .getEndpoint()))
-                    .findFirst();
-            if (endpointConfigs.isEmpty()) {
+            Map<String, Object> endpointConfigs=null;
+            for( Map<String,Object> routeDetails : routes){
+                String endpoint = (String) routeDetails.get("endpoint");
+                if( httpContext.getHttpRequest().getEndpoint().equals(endpoint) || verifyAndExtractPathVariableEndpoint(endpoint, httpContext) ){
+                    endpointConfigs = routeDetails;
+                    break;
+                }
+            }
+
+            if (endpointConfigs == null || endpointConfigs.isEmpty()) {
                 throw new HttpException("routing config not found for the endpoint", HttpResponseStatus.NOT_FOUND);
             }
 
-            GeneratorType generatorType = GeneratorType.fromString((String) endpointConfigs.get().get("type"));
-            HttpResponderFactory.getHttpResponder(generatorType).generateResponse((HttpContext) context, endpointConfigs.get(), method);
+            GeneratorType generatorType = GeneratorType.fromString((String) endpointConfigs.get("type"));
+            HttpResponderFactory.getHttpResponder(generatorType).generateResponse((HttpContext) context, endpointConfigs, method);
         }catch (HttpException ex){
             HttpServerUtils.generateErrorHeader(ex.getStatus(), (HttpContext) context);
         } catch (Exception e) {
             HttpServerUtils.generateErrorHeader(HttpResponseStatus.INTERNAL_SERVER_ERROR, (HttpContext) context);
         }
+    }
+
+    private static boolean verifyAndExtractPathVariableEndpoint(String endpoint, HttpContext httpContext) {
+        String[] configEndpointSplit = endpoint.split("/");
+        String[] requestEndpointSplit = httpContext.getHttpRequest().getEndpoint().split("/");
+        if(configEndpointSplit.length != requestEndpointSplit.length)
+            return false;
+        for(int i=0;i<configEndpointSplit.length;i++){
+            if (configEndpointSplit[i].startsWith("{") && configEndpointSplit[i].endsWith("}")) {
+                String variableName = configEndpointSplit[i].replace("{","").replace("}","");
+                httpContext.getHttpRequest().getPathVariable().put(variableName,requestEndpointSplit[i]);
+                continue;
+            }
+            if (configEndpointSplit[i].equals(requestEndpointSplit[i]))
+                continue;
+            return false;
+        }
+        return true;
     }
 }

@@ -14,7 +14,7 @@ public class GeneratorFactory {
 
 
     public static ResponseGenerator getGeneratorFactory(ServerContext context){
-        if ( context instanceof HttpContext && ((HttpContext) context).getHttpRequest().getRequestHeader().getProtocol().equals(Protocol.HTTP_1_1)){
+        if ( context instanceof HttpContext && ((HttpContext) context).getHttpRequest().getProtocol().equals(Protocol.HTTP_1_1)){
             LOGGER.debug("HttpRequest builder created for protocol {}",Protocol.HTTP_1_1);
             return HttpResponseGenerator.getInstance();
         }

@@ -72,8 +72,7 @@ public class HttpContext extends ServerContext {
                 throw new NullPointerException("OutputStream should not be null");
             }
             if( this.httpRequest == null){
-                HttpRequestHeader header = new HttpRequestHeader();
-                this.httpRequest = new HttpRequest(header);
+                this.httpRequest = new HttpRequest();
             }
             if( this.httpResponse == null){
                 this.httpResponse = new HttpResponse();

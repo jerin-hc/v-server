@@ -11,7 +11,11 @@ import lombok.NoArgsConstructor;
 public class HttpResponse {
     private HttpResponseStatus status = HttpResponseStatus.OK;
     private HttpContentType contentType = HttpContentType.JSON;
-    private Object body;
+    private Object body = new Object();
+
+    public HttpResponse(HttpResponseStatus status){
+        this.status = status;
+    }
 
     public HttpResponse(HttpResponseStatus status, Object body){
         this.status = status;
