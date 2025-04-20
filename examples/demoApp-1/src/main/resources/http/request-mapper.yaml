@@ -5,9 +5,16 @@ http:
       - endpoint: /index.html
         type: file
         path: /WEB-INF
+
       - endpoint: /hello
         type: controller
-        path: com.ij3rry.controller.HelloController
+        path: com.ij3rry.employee.controller.HelloController
+
       - endpoint: /employee
         type: controller
-        path: com.ij3rry.controller.EmployeeController
+        path: com.ij3rry.employee.controller.EmployeeController
+
+    PATCH:
+      - endpoint: /employee/{age}/info/{level}
+        type: controller
+        path: com.ij3rry.employee.controller.EmployeeController
